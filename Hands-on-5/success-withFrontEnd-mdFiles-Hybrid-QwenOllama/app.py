@@ -115,7 +115,7 @@ def process_question(question):
         st.session_state.llm_prompt = llm_prompt
 
         llm_payload = {
-            "model": "qwen2.5:32b",
+            "model": "qwen2.5:7b",
             "stream": False,
             "prompt": llm_prompt,
         }

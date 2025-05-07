@@ -1,0 +1,12 @@
+llama-index
+llama-index-readers-elasticsearch
+llama-index-vector-stores-opensearch
+llama-index-embeddings-ollama
+ollama
+nest-asyncio
+llama-index-embeddings-huggingface
+torch
+fastapi
+uvicorn
+streamlit
+markdown

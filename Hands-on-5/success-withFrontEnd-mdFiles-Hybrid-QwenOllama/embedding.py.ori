@@ -9,8 +9,6 @@ from llama_index.vector_stores.opensearch import OpensearchVectorStore, Opensear
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core.vector_stores.types import VectorStoreQueryMode
 import pickle
-import time
-import random
 
 # Apply nest_asyncio to avoid runtime errors
 nest_asyncio.apply()
@@ -39,6 +37,10 @@ print(f"Loaded {len(documents)} markdown documents")
 md_parser = MarkdownNodeParser(chunk_size=1024)
 nodes = md_parser.get_nodes_from_documents(documents, show_progress=True)
 
+# Alternatively, use the token splitter if you prefer
+# splitter = TokenTextSplitter(chunk_size=1024, chunk_overlap=256, separator=" ")
+# nodes = splitter.get_nodes_from_documents(documents, show_progress=True)
+
 print(f"Created {len(nodes)} nodes")
 
 # Setup embedding model
@@ -50,39 +52,15 @@ embeddings = embed_model.get_text_embedding("box")
 dim = len(embeddings)
 print(f"Embedding dimension: {dim}")
 
-# Retry function for OpenSearch connection
-def connect_with_retry(max_retries=5, initial_backoff=1, max_backoff=60):
-    retries = 0
-    while retries < max_retries:
-        try:
-            # Setup OpensearchVectorClient with a supported engine
-            client = OpensearchVectorClient(
-                endpoint=endpoint,
-                index=idx,
-                dim=dim,
-                embedding_field=embedding_field,
-                text_field=text_field,
-                engine="faiss",  # Use faiss instead of nmslib
-                # Remove search_pipeline until we confirm it's configured
-                # search_pipeline="hybrid-search-pipeline",
-            )
-            return client
-        except Exception as e:
-            retries += 1
-            print(f"Error: {str(e)}")
-            if retries == max_retries:
-                raise e
-            
-            # Calculate backoff with jitter
-            backoff = min(initial_backoff * (2 ** (retries - 1)), max_backoff)
-            jitter = random.uniform(0, 0.1 * backoff)
-            sleep_time = backoff + jitter
-            
-            print(f"Connection failed. Retrying in {sleep_time:.2f} seconds... (Attempt {retries}/{max_retries})")
-            time.sleep(sleep_time)
-
-# Connect to OpenSearch with retry
-client = connect_with_retry()
+# Setup OpensearchVectorClient
+client = OpensearchVectorClient(
+    endpoint=endpoint,
+    index=idx,
+    dim=dim,
+    embedding_field=embedding_field,
+    text_field=text_field,
+    search_pipeline="hybrid-search-pipeline",
+)
 
 # Initialize vector store
 vector_store = OpensearchVectorStore(client)
@@ -98,8 +76,8 @@ with open('md_index.pkl', 'wb') as f:
     pickle.dump(index, f)
 print("Index created and saved to md_index.pkl")
 
-# Test with default retrieval (without hybrid search for now)
-retriever = index.as_retriever(similarity_top_k=3)
+# Optional: Test retrieval
+retriever = index.as_retriever(similarity_top_k=3, vector_store_query_mode=VectorStoreQueryMode.HYBRID)
 text_retrieve = "ถูกเข้าถึงระบบคอมโดยไม่ได้รับอนุญาต ผิดกฎหมายฉบับใด ควรสอบสวนอย่างไร"
 prompt = retriever.retrieve(text_retrieve)
 print("\nTest retrieval results:")
