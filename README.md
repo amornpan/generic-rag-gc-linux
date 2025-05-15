@@ -97,7 +97,7 @@ graph TD
      --name=opensearch-single-node \
      opensearchproject/opensearch:latest
    ```
-    2.1 คำสั่งแบบบันทัดเดียว
+    2.1 คำสั่งแบบบรรทัดเดียว
     ```bash
     docker run -e OPENSEARCH_JAVA_OPTS="-Xms2g -Xmx2g" -e discovery.type="single-node" -e DISABLE_SECURITY_PLUGIN="true" -e bootstrap.memory_lock="true" -e cluster.name="opensearch-cluster" -e node.name="os01" -e DISABLE_INSTALL_DEMO_CONFIG="true" --ulimit nofile="65536:65536" --ulimit memlock="-1:-1" --net opensearch-net --restart=always -v opensearch-data:/usr/share/opensearch/data -p 9200:9200 --name=opensearch-single-node opensearchproject/opensearch:latest
     ```
