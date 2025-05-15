@@ -52,6 +52,7 @@ graph TD
   - [สารบัญ](#สารบัญ)
   - [ข้อกำหนดขั้นต่ำของระบบ](#ข้อกำหนดขั้นต่ำของระบบ)
   - [การติดตั้ง OpenSearch](#การติดตั้ง-opensearch)
+  - [การติดตั้ง Miniconda และสภาพแวดล้อม](#การติดตั้ง-miniconda-และสภาพแวดล้อม)
   - [การตั้งค่า Hybrid Search Pipeline](#การตั้งค่า-hybrid-search-pipeline)
   - [การสร้างและปรับแต่ง Embedding](#การสร้างและปรับแต่ง-embedding)
   - [การรัน API Server](#การรัน-api-server)
@@ -123,6 +124,7 @@ graph TD
   "task_max_waiting_in_queue_millis": 0,
   "active_shards_percent_as_number": 65
 }
+```
 
 3.1.1 คลัสเตอร์ชื่อ opensearch-cluster กำลังทำงานอยู่
 3.1.2 สถานะ "status":"yellow" หมายความว่าคลัสเตอร์ทำงานได้และสามารถรับคำขอได้ แต่อาจมีบางปัญหาเล็กน้อย
