@@ -47,14 +47,19 @@ graph TD
 
 ## สารบัญ
 
-- [ข้อกำหนดขั้นต่ำของระบบ](#ข้อกำหนดขั้นต่ำของระบบ)
-- [การติดตั้ง OpenSearch](#การติดตั้ง-opensearch)
-- [การติดตั้ง Miniconda และสภาพแวดล้อม](#การติดตั้ง-miniconda-และสภาพแวดล้อม)
-- [การตั้งค่า Hybrid Search Pipeline](#การตั้งค่า-hybrid-search-pipeline)
-- [การสร้างและปรับแต่ง Embedding](#การสร้างและปรับแต่ง-embedding)
-- [การรัน API Server](#การรัน-api-server)
-- [การรัน Frontend](#การรัน-frontend)
-- [การแก้ไขปัญหา](#การแก้ไขปัญหา)
+- [คู่มือการติดตั้งและการใช้งานระบบ RAG ด้วย OpenSearch และ LLM](#คู่มือการติดตั้งและการใช้งานระบบ-rag-ด้วย-opensearch-และ-llm)
+  - [แผนภาพสถาปัตยกรรมระบบ](#แผนภาพสถาปัตยกรรมระบบ)
+  - [สารบัญ](#สารบัญ)
+  - [ข้อกำหนดขั้นต่ำของระบบ](#ข้อกำหนดขั้นต่ำของระบบ)
+  - [การติดตั้ง OpenSearch](#การติดตั้ง-opensearch)
+  - [การตั้งค่า Hybrid Search Pipeline](#การตั้งค่า-hybrid-search-pipeline)
+  - [การสร้างและปรับแต่ง Embedding](#การสร้างและปรับแต่ง-embedding)
+  - [การรัน API Server](#การรัน-api-server)
+  - [การรัน Frontend](#การรัน-frontend)
+  - [การแก้ไขปัญหา](#การแก้ไขปัญหา)
+    - [ปัญหา: ไม่สามารถเชื่อมต่อกับ OpenSearch](#ปัญหา-ไม่สามารถเชื่อมต่อกับ-opensearch)
+    - [ปัญหา: API ไม่ทำงาน](#ปัญหา-api-ไม่ทำงาน)
+    - [ปัญหา: LLM ไม่ทำงาน (สำหรับเครื่อง e2-standard-4)](#ปัญหา-llm-ไม่ทำงาน-สำหรับเครื่อง-e2-standard-4)
 
 ## ข้อกำหนดขั้นต่ำของระบบ
 
@@ -94,8 +99,44 @@ graph TD
 
 3. ตรวจสอบว่า OpenSearch ทำงานถูกต้อง:
    ```bash
-   curl http://localhost:9200
+   curl -X GET "http://localhost:9200/_cluster/health"
    ```
+
+3.1 ผลลัพธ์
+```json
+{
+  "cluster_name": "opensearch-cluster",
+  "status": "yellow",
+  "timed_out": false,
+  "number_of_nodes": 1,
+  "number_of_data_nodes": 1,
+  "discovered_master": true,
+  "discovered_cluster_manager": true,
+  "active_primary_shards": 13,
+  "active_shards": 13,
+  "relocating_shards": 0,
+  "initializing_shards": 0,
+  "unassigned_shards": 7,
+  "delayed_unassigned_shards": 0,
+  "number_of_pending_tasks": 0,
+  "number_of_in_flight_fetch": 0,
+  "task_max_waiting_in_queue_millis": 0,
+  "active_shards_percent_as_number": 65
+}
+
+3.1.1 คลัสเตอร์ชื่อ opensearch-cluster กำลังทำงานอยู่
+3.1.2 สถานะ "status":"yellow" หมายความว่าคลัสเตอร์ทำงานได้และสามารถรับคำขอได้ แต่อาจมีบางปัญหาเล็กน้อย
+3.1.3 มี node ทำงานอยู่ 1 node ("number_of_nodes":1)
+3.1.4 มี shard ที่ active อยู่ 13 shard ("active_shards":13)
+3.1.5 มี unassigned shards 7 shard ("unassigned_shards":7) ซึ่งเป็นสาเหตุที่สถานะเป็น yellow
+
+สถานะ "yellow" เป็นเรื่องปกติสำหรับการติดตั้ง OpenSearch แบบ single node เนื่องจาก OpenSearch ต้องการ replica shards แต่เมื่อมีเพียง node เดียว replica shards จะไม่สามารถถูกกำหนดได้ (เพราะ replica ต้องอยู่บน node ที่แตกต่างจาก primary)
+ถ้าคุณใช้ OpenSearch สำหรับการพัฒนาหรือทดสอบบนเครื่องเดียว สถานะ yellow นี้ไม่มีปัญหาและคุณสามารถใช้งานได้ตามปกติ
+ถ้าต้องการให้สถานะเป็น green คุณสามารถ:
+
+ตั้งค่าจำนวน replica เป็น 0 สำหรับ index ที่คุณสร้าง หรือ
+เพิ่ม node เข้าไปในคลัสเตอร์ (ในกรณีที่เป็นระบบ production)
+
 
 ## การติดตั้ง Miniconda และสภาพแวดล้อม
 
