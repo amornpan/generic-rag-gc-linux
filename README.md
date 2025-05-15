@@ -97,6 +97,10 @@ graph TD
      --name=opensearch-single-node \
      opensearchproject/opensearch:latest
    ```
+    2.1 คำสั่งแบบบันทัดเดียว
+    ```bash
+    docker run -e OPENSEARCH_JAVA_OPTS="-Xms2g -Xmx2g" -e discovery.type="single-node" -e DISABLE_SECURITY_PLUGIN="true" -e bootstrap.memory_lock="true" -e cluster.name="opensearch-cluster" -e node.name="os01" -e DISABLE_INSTALL_DEMO_CONFIG="true" --ulimit nofile="65536:65536" --ulimit memlock="-1:-1" --net opensearch-net --restart=always -v opensearch-data:/usr/share/opensearch/data -p 9200:9200 --name=opensearch-single-node opensearchproject/opensearch:latest
+    ```
 
 3. ตรวจสอบว่า OpenSearch ทำงานถูกต้อง:
    ```bash
@@ -126,11 +130,11 @@ graph TD
 }
 ```
 
-3.1.1 คลัสเตอร์ชื่อ opensearch-cluster กำลังทำงานอยู่
-3.1.2 สถานะ "status":"yellow" หมายความว่าคลัสเตอร์ทำงานได้และสามารถรับคำขอได้ แต่อาจมีบางปัญหาเล็กน้อย
-3.1.3 มี node ทำงานอยู่ 1 node ("number_of_nodes":1)
-3.1.4 มี shard ที่ active อยู่ 13 shard ("active_shards":13)
-3.1.5 มี unassigned shards 7 shard ("unassigned_shards":7) ซึ่งเป็นสาเหตุที่สถานะเป็น yellow
+    3.1.1 คลัสเตอร์ชื่อ opensearch-cluster กำลังทำงานอยู่
+    3.1.2 สถานะ "status":"yellow" หมายความว่าคลัสเตอร์ทำงานได้และสามารถรับคำขอได้ แต่อาจมีบางปัญหาเล็กน้อย
+    3.1.3 มี node ทำงานอยู่ 1 node ("number_of_nodes":1)
+    3.1.4 มี shard ที่ active อยู่ 13 shard ("active_shards":13)
+    3.1.5 มี unassigned shards 7 shard ("unassigned_shards":7) ซึ่งเป็นสาเหตุที่สถานะเป็น yellow
 
 สถานะ "yellow" เป็นเรื่องปกติสำหรับการติดตั้ง OpenSearch แบบ single node เนื่องจาก OpenSearch ต้องการ replica shards แต่เมื่อมีเพียง node เดียว replica shards จะไม่สามารถถูกกำหนดได้ (เพราะ replica ต้องอยู่บน node ที่แตกต่างจาก primary)
 ถ้าคุณใช้ OpenSearch สำหรับการพัฒนาหรือทดสอบบนเครื่องเดียว สถานะ yellow นี้ไม่มีปัญหาและคุณสามารถใช้งานได้ตามปกติ
