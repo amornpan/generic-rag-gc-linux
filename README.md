@@ -197,6 +197,11 @@ graph TD
    }'
    ```
 
+    1.1 คำสั่งแบบบรรทัดเดียว:
+    ```bash
+    curl -X PUT "http://localhost:9200/_search/pipeline/hybrid-search-pipeline" -H "Content-Type: application/json" -d "{\"description\": \"Post processor for hybrid search\", \"phase_results_processors\": [{\"normalization-processor\": {\"normalization\": {\"technique\": \"min_max\"}, \"combination\": {\"technique\": \"arithmetic_mean\", \"parameters\": {\"weights\": [0.3, 0.7]}}}}]}"
+    ```
+
 2. ตรวจสอบว่า pipeline ถูกสร้างแล้ว:
    ```bash
    curl -X GET "http://localhost:9200/_search/pipeline/hybrid-search-pipeline"
